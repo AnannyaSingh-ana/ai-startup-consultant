@@ -1,0 +1,7 @@
+crewai
+crewai-tools
+python-dotenv
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
