@@ -1,4 +1,4 @@
-# Founders' Forge — Backend
+# Founders' Forge - Backend
 
 AI-powered startup consultant backend. A team of 10 CrewAI agents research and generate a complete, grounded business plan from a user's business idea, target country, and target customer.
 
