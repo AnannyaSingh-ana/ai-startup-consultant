@@ -43,7 +43,7 @@ Founders' Forge is an AI-powered startup consulting platform that helps aspiring
 
 Instead of relying on a single LLM response, Founders' Forge orchestrates a team of specialized AI agents that perform market research, competitor analysis, financial planning, legal research, SWOT analysis, marketing strategy, investment evaluation, and founder recommendations.
 
-The platform combines live web research, structured reasoning, and multi-agent collaboration to generate a comprehensive startup feasibility report grounded in real-world information.
+The platform combines live web research, structured reasoning, and multi-agent collaboration to generate a structured startup analysis report grounded in real-world information.
 
 ---
 
@@ -68,14 +68,14 @@ Founders' Forge acts like an AI consulting firm by answering these questions thr
 - 9 specialized AI agents
 - Multi-agent orchestration with CrewAI
 - Live web-grounded research
-- Structured startup feasibility reports
+- Structured startup analysis report
 
 ### Business Analysis
 - Market research
 - Competitor analysis
 - Historical startup failure analysis
 - SWOT analysis
-- Financial projections
+- AI-generated financial estimates
 - Investment scoring
 - Founder recommendations
 
@@ -180,6 +180,8 @@ For every startup idea, Founders' Forge generates:
 - Additional integrations
 
 ---
+
+> **Note:** Founders' Forge is intended as a decision-support tool for early-stage idea validation. The generated analyses should be treated as starting points for further research rather than professional financial or legal advice.
 
 ## License
 
