@@ -33,7 +33,7 @@
 
 ### Financial Analysis
 
-![Financial Analysis](README-assets/05-finance)
+![Financial Analysis](README-assets/05-finance-analysis.png)
 
 ### Founder Recommendation
 
