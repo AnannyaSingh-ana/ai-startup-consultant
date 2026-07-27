@@ -149,12 +149,8 @@ def recompute_breakeven(finance: dict) -> dict:
     customers = parse_number(finance.get("assumed_customers_month_12"))
 
     if None in (startup_cost, monthly_burn, price, customers):
-        finance["breakeven_months"] = "Unavailable"
-        finance["breakeven_note"] = (
-            "Could not recompute breakeven_months — one or more required "
-            "fields (startup_cost, monthly_burn, expected_pricing, "
-            "assumed_customers_month_12) was missing or non-numeric."
-        )
+        finance["theoretical_breakeven_months"] = "Unavailable"
+        
         return finance
 
     monthly_revenue = price * customers
