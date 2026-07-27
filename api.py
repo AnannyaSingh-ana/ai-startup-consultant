@@ -174,7 +174,7 @@ def recompute_breakeven(finance: dict) -> dict:
         return finance
 
     breakeven_months = startup_cost / monthly_surplus
-    finance["breakeven_months"] = round(breakeven_months, 1)
+    finance["theoretical_breakeven_months"] = round(breakeven_months, 1)
     finance["startup_cost"] = round(startup_cost, 2)
     finance["monthly_burn"] = round(monthly_burn, 2)
     finance["expected_pricing"] = round(price, 2)

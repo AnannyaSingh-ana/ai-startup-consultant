@@ -92,51 +92,83 @@ historical_failures_task = Task(
 
 finance_task = Task(
     description=(
-        "Build an illustrative financial model for '{business_idea}' "
-        "targeting {target_customer}, based on the market and competitor "
-        "research provided as context. If {target_country} is known, use "
-        "its local currency; if not, use generic units (e.g. 'local "
-        "currency units') rather than defaulting to USD. "
-        "First, decide your own pricing (price per customer per period) and "
-        "a realistic customer count for month 12. Then derive every number "
-        "below FROM those two assumptions, so they are mathematically "
-        "consistent with each other — do not state monthly_burn, revenue, "
-        "or breakeven_months as independent guesses. Specifically: "
-        "(1) startup_cost — total one-time cost to launch (equipment, "
-        "setup, initial inventory, legal/registration, initial marketing), "
-        "(2) monthly_burn — average ongoing monthly operating cost once "
-        "the business is running (rent/hosting, staff, recurring "
-        "marketing, COGS at your assumed customer count), "
-        "(3) breakeven_months — the number of months of (monthly revenue "
-        "at your assumed price x customers, minus monthly_burn) needed to "
-        "recover startup_cost. Show this arithmetic in the assumptions list. "
-        "Also estimate CAC, LTV, and gross margin using the same pricing "
-        "and customer assumptions. "
-        "Scale every cost to the actual nature of this business — a home-based, "
-        "solo, or small-scale operation should have startup costs and monthly "
-        "burn far lower than a full commercial storefront or large operation. "
-        "Do not include large equipment, large initial inventory, or commercial "
-        "setup costs unless the business idea explicitly requires them. When in "
-        "doubt, favor the leaner, more realistic estimate a real solo founder "
-        "would actually spend. "
-        "Every number must be clearly labeled as an illustrative planning "
-        "assumption, not a researched or verified figure. " + GEO_GUARDRAIL
-    ),
+    "Build an illustrative financial model for '{business_idea}' "
+    "targeting {target_customer}, based on the market and competitor "
+    "research provided as context. If {target_country} is known, use "
+    "its local currency; if not, use generic units (e.g. 'local "
+    "currency units') rather than defaulting to USD. "
+
+    "First, decide realistic assumptions for: "
+    "(1) price per customer, "
+    "(2) expected paying customers by month 12, "
+    "(3) startup costs, and "
+    "(4) monthly operating costs. "
+
+    "From these assumptions, estimate: "
+    "startup_cost (one-time launch costs), "
+    "monthly_burn (average ongoing monthly operating costs), "
+    "expected_pricing, "
+    "assumed_customers_month_12, "
+    "CAC, "
+    "LTV, "
+    "gross_margin, and "
+    "realistic_breakeven_months. "
+
+    "IMPORTANT: realistic_breakeven_months is NOT a mathematical calculation. "
+    "It should estimate when a real startup would likely reach break-even "
+    "after accounting for gradual customer acquisition, slow early growth, "
+    "marketing ramp-up, onboarding delays, and other real-world factors. "
+    "Do not simply divide startup_cost by monthly profit. The backend will "
+    "calculate the theoretical break-even separately. "
+
+    "Scale every cost to the actual nature of this business. "
+    "A solo founder, home-based business, SaaS MVP, or digital product "
+    "should have much lower startup costs than a full commercial operation. "
+    "Only include expensive equipment, inventory, office rent, or hiring "
+    "when the business genuinely requires them. "
+
+    "The assumptions section must clearly explain every number you chose, "
+    "including pricing, customer count, startup cost breakdown, monthly "
+    "burn breakdown, CAC reasoning, LTV reasoning, gross margin reasoning, "
+    "and why the realistic break-even timeline is longer than the "
+    "theoretical financial calculation if applicable. "
+
+    "Every number must be clearly labeled as an illustrative planning "
+    "assumption, not a researched or verified figure. "
+    + GEO_GUARDRAIL
+),
     expected_output=(
-        "A JSON object with EXACTLY these fields: "
-        '{"currency": "...", "startup_cost": "...", "monthly_burn": "...", '
-        '"breakeven_months": "...", "expected_pricing": "...", '
-        '"assumed_customers_month_12": "...", "cac": "...", "ltv": "...", '
-        '"gross_margin": "...", "assumptions": [...], '
-        '"disclaimer": "These figures are illustrative planning '
-        'assumptions only, not researched or verified estimates."}. '
-        'The "assumptions" list must spell out every input number used '
-        '(price, customer count, cost breakdown) AND the arithmetic that '
-        'connects startup_cost, monthly_burn, and breakeven_months, so a '
-        'reader can verify the three core numbers agree with each other.'
-    ),
-    agent=finance_agent,
-    context=[market_research_task, competitor_analysis_task],
+    "A JSON object with EXACTLY these fields: "
+    '{"currency": "...", '
+    '"startup_cost": "...", '
+    '"monthly_burn": "...", '
+    '"realistic_breakeven_months": "...", '
+    '"expected_pricing": "...", '
+    '"assumed_customers_month_12": "...", '
+    '"cac": "...", '
+    '"ltv": "...", '
+    '"gross_margin": "...", '
+    '"assumptions": [...], '
+    '"disclaimer": "These figures are illustrative planning '
+    'assumptions only, not researched or verified estimates."}. '
+
+    'The "assumptions" list must clearly explain: '
+    '(1) expected pricing, '
+    '(2) expected paying customers by month 12, '
+    '(3) startup cost breakdown, '
+    '(4) monthly burn breakdown, '
+    '(5) CAC reasoning, '
+    '(6) LTV reasoning, '
+    '(7) gross margin reasoning, '
+    '(8) the arithmetic used to calculate theoretical monthly revenue '
+    '(expected_pricing × assumed_customers_month_12), and '
+    '(9) why the realistic_breakeven_months is longer than the theoretical '
+    'financial break-even whenever applicable. '
+    'Do not calculate theoretical break-even yourself; the backend will '
+    'calculate it automatically.'
+),
+agent=finance_agent,
+context=[market_research_task, competitor_analysis_task],
 )
 
 swot_task = Task(
@@ -158,23 +190,48 @@ swot_task = Task(
 marketing_task = Task(
     description=(
         "Using the market research and competitor analysis provided as "
-        "context, suggest positioning and go-to-market ideas for "
-        "'{business_idea}' targeting {target_customer}. If {target_country} "
-        "is known, include locally relevant channels/platforms from the "
-        "research provided — do not invent cities, regions, or platforms "
-        "not supported by that research. If country is unknown, keep ideas "
-        "channel-type-generic (e.g. 'local delivery apps') rather than "
-        "naming specific cities. " + GEO_GUARDRAIL
+        "context, develop a realistic early-stage marketing strategy for "
+        "'{business_idea}' targeting {target_customer}. "
+
+        "If {target_country} is known, recommend only locally relevant "
+        "marketing channels and platforms supported by the research. "
+        "Do not invent cities, platforms, influencers, or communities. "
+        "If the country is unknown, keep recommendations generic "
+        "(e.g. local marketplaces, local social platforms, industry events). "
+
+        "Prioritize low-cost, founder-friendly customer acquisition rather "
+        "than enterprise-scale marketing. Focus on what a startup could "
+        "actually execute during its first few months with limited resources. "
+
+        "For every acquisition channel, briefly explain WHY it fits this "
+        "business and target customer. Rank channels from highest to lowest "
+        "expected ROI. Suggest measurable KPIs rather than vague marketing "
+        "advice. "
+        + GEO_GUARDRAIL
     ),
     expected_output=(
         "A JSON object with exactly these fields: "
-        '{"positioning": "...", "go_to_market_ideas": [...]}. '
-        'The "go_to_market_ideas" list should have 3-5 concrete ideas.'
+        '{'
+        '"positioning": "...", '
+        '"ideal_customer_message": "...", '
+        '"launch_strategy": "...", '
+        '"customer_acquisition_channels": ['
+        '{"channel":"...", "reason":"...", "priority":1},'
+        '{"channel":"...", "reason":"...", "priority":2}'
+        '], '
+        '"kpis":[...], '
+        '"biggest_marketing_risk":"...", '
+        '"go_to_market_ideas":[...]'
+        '}. '
+        'Include 3–5 customer acquisition channels ranked by priority and '
+        '3–5 concrete go-to-market ideas.'
     ),
     agent=marketing_agent,
-    context=[market_research_task, competitor_analysis_task],
+    context=[
+        market_research_task,
+        competitor_analysis_task,
+    ],
 )
-
 legal_task = Task(
     description=(
         "Flag realistic legal, licensing, and compliance considerations for "
@@ -198,20 +255,61 @@ legal_task = Task(
 investment_score_task = Task(
     description=(
         "Using the market research, competitor analysis, historical "
-        "failures, and finance model provided as context, score "
-        "'{business_idea}' across four dimensions, each out of 10: "
-        "(1) Market Potential, (2) Competition (lower = more brutal), "
-        "(3) Execution Difficulty (lower = harder), (4) Moat. Then compute "
-        "an overall score out of 100 as a weighted, honest synthesis. Base "
-        "scores only on the research provided, not on assumed geography."
+        "failures, and finance model provided as context, evaluate "
+        "'{business_idea}' like an experienced early-stage investor. "
+        "Score each category honestly based ONLY on the research provided. "
+        "Do not inflate scores to encourage the founder. "
+
+        "Score the following dimensions (each out of 10): "
+        "(1) Market Potential, "
+        "(2) Competition (10 = weak competition, 1 = extremely competitive), "
+        "(3) Execution Difficulty (10 = relatively easy to execute, "
+        "1 = extremely difficult), "
+        "(4) Moat. "
+
+        "IMPORTANT: Do NOT assign the Moat score directly. "
+        "First evaluate these five components, each scored from 0–2: "
+        "(a) Brand Advantage, "
+        "(b) Technology/IP Advantage, "
+        "(c) Network Effects, "
+        "(d) Switching Costs, "
+        "(e) Proprietary Data or Distribution Advantage. "
+
+        "The Moat score must equal the sum of those five component scores "
+        "(maximum 10). Briefly justify every component score. "
+
+        "Finally compute an overall score out of 100 as a balanced synthesis "
+        "of all findings. The overall score should reflect investability, "
+        "not just market size. Businesses with great markets but brutal "
+        "competition or weak differentiation should not receive very high "
+        "overall scores."
     ),
     expected_output=(
         "A JSON object with exactly these fields: "
-        '{"market_potential": X, "competition": X, "execution_difficulty": X, '
-        '"moat": X, "overall_score": X, "reasoning": "..."}.'
+        '{'
+        '"market_potential": X, '
+        '"competition": X, '
+        '"execution_difficulty": X, '
+        '"moat": X, '
+        '"moat_breakdown": {'
+        '"brand_advantage": {"score": X, "reason": "..."}, '
+        '"technology_ip": {"score": X, "reason": "..."}, '
+        '"network_effects": {"score": X, "reason": "..."}, '
+        '"switching_costs": {"score": X, "reason": "..."}, '
+        '"data_distribution": {"score": X, "reason": "..."}'
+        '}, '
+        '"overall_score": X, '
+        '"reasoning": "..."'
+        '}. '
+        'The moat score MUST equal the sum of the five moat component scores.'
     ),
     agent=investment_score_agent,
-    context=[market_research_task, competitor_analysis_task, historical_failures_task, finance_task],
+    context=[
+        market_research_task,
+        competitor_analysis_task,
+        historical_failures_task,
+        finance_task,
+    ],
 )
 
 founder_advisor_task = Task(
@@ -229,7 +327,10 @@ founder_advisor_task = Task(
     "field confidently (e.g. no clear MVP angle emerged from the research), "
     "explicitly say so — for example: 'The research doesn't specify a "
     "particular city/product angle, so no specific recommendation is "
-    "made here.' Never fill gaps with plausible-sounding invention. "
+    "made here.' Never fill gaps with plausible-sounding invention."
+    "If different agent outputs conflict with each other, explain which evidence"
+    "you trust more and base your recommendation on that rather than averaging"
+    "or ignoring the conflict. "
     + GEO_GUARDRAIL
 ),
     expected_output=(

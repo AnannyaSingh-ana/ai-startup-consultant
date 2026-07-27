@@ -136,7 +136,8 @@ def build_report(plan: dict, idea: str, country: str, customer: str) -> str:
 - **Monthly Burn:** {g(fin, "monthly_burn")}
 - **Expected Pricing:** {g(fin, "expected_pricing")}
 - **Expected Customers (Month 12):** {g(fin, "assumed_customers_month_12")}
-- **Break-even:** {g(fin, "breakeven_months")} months
+- **Theoretical Break-even:** {g(fin, "theoretical_breakeven_months")} months
+- **Realistic Break-even:** ~{g(fin, "realistic_breakeven_months")} months
 - **Monthly Revenue (Calculated):** {g(fin, "monthly_revenue")}
 - **Monthly Surplus (Calculated):** {g(fin, "monthly_surplus")}
 - **CAC:** {g(fin, "cac")}
