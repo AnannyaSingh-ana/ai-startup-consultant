@@ -159,6 +159,8 @@ def recompute_breakeven(finance: dict) -> dict:
 
     monthly_revenue = price * customers
     monthly_surplus = monthly_revenue - monthly_burn
+    finance["monthly_revenue"] = round(monthly_revenue, 2)
+    finance["monthly_surplus"] = round(monthly_surplus, 2)
 
     if monthly_surplus <= 0:
         finance["breakeven_months"] = "Not reached at this scale"
@@ -173,6 +175,10 @@ def recompute_breakeven(finance: dict) -> dict:
 
     breakeven_months = startup_cost / monthly_surplus
     finance["breakeven_months"] = round(breakeven_months, 1)
+    finance["startup_cost"] = round(startup_cost, 2)
+    finance["monthly_burn"] = round(monthly_burn, 2)
+    finance["expected_pricing"] = round(price, 2)
+    finance["assumed_customers_month_12"] = round(customers)
     finance["breakeven_note"] = (
         f"Recalculated in code: {startup_cost:,.0f} startup cost / "
         f"({monthly_revenue:,.0f} monthly revenue - {monthly_burn:,.0f} "

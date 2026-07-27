@@ -127,13 +127,18 @@ def build_report(plan: dict, idea: str, country: str, customer: str) -> str:
 
 ---
 
+
 ## Finance
 *{g(fin, "disclaimer")}*
 
 - **Currency:** {g(fin, "currency")}
-- **First-Year Expenses:** {g(fin, "first_year_expenses")}
+- **Startup Cost:** {g(fin, "startup_cost")}
+- **Monthly Burn:** {g(fin, "monthly_burn")}
 - **Expected Pricing:** {g(fin, "expected_pricing")}
-- **Revenue Assumptions:** {g(fin, "revenue_assumptions")}
+- **Expected Customers (Month 12):** {g(fin, "assumed_customers_month_12")}
+- **Break-even:** {g(fin, "breakeven_months")} months
+- **Monthly Revenue (Calculated):** {g(fin, "monthly_revenue")}
+- **Monthly Surplus (Calculated):** {g(fin, "monthly_surplus")}
 - **CAC:** {g(fin, "cac")}
 - **LTV:** {g(fin, "ltv")}
 - **Gross Margin:** {g(fin, "gross_margin")}
