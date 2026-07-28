@@ -275,8 +275,15 @@ investment_score_task = Task(
         "(d) Switching Costs, "
         "(e) Proprietary Data or Distribution Advantage. "
 
-        "The Moat score must equal the sum of those five component scores "
-        "(maximum 10). Briefly justify every component score. "
+        "The Moat score must equal the sum of those five component scores. "
+
+        "For EVERY moat component reason, follow these rules strictly: "
+        "- Maximum 20 words. "
+        "- Exactly one sentence. "
+        "- Explain why the score was assigned. "
+        "- Be specific and evidence-based. "
+        "- Do not repeat the startup description. "
+        "- Avoid filler, hedging, or generic advice. "
 
         "Finally compute an overall score out of 100 as a balanced synthesis "
         "of all findings. The overall score should reflect investability, "
@@ -301,7 +308,8 @@ investment_score_task = Task(
         '"overall_score": X, '
         '"reasoning": "..."'
         '}. '
-        'The moat score MUST equal the sum of the five moat component scores.'
+        "The moat score MUST equal the sum of the five moat component scores. "
+        "Each moat reason MUST be exactly one sentence and no longer than 20 words."
     ),
     agent=investment_score_agent,
     context=[
@@ -311,7 +319,6 @@ investment_score_task = Task(
         finance_task,
     ],
 )
-
 founder_advisor_task = Task(
     description=(
     "Using ALL research provided as context for '{business_idea}', give "
