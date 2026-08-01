@@ -1,6 +1,7 @@
 from crewai import Agent
 from tools import search_tool
 
+
 historical_failures_agent = Agent(
     role="Startup Failure Analyst",
     goal=(
@@ -18,4 +19,5 @@ historical_failures_agent = Agent(
     tools=[search_tool],
     verbose=True,
     allow_delegation=False,
+    
 )

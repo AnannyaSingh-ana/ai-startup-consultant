@@ -15,4 +15,5 @@ investment_score_agent = Agent(
     ),
     verbose=True,
     allow_delegation=False,
+    
 )

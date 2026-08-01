@@ -14,13 +14,21 @@ import re
 import logging
 
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi import Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from crew import build_crew  # this must match the function name in your existing crew.py
 from database import Base, engine, get_db
-from models import BusinessPlan
+from datetime import date
+from models import BusinessPlan, DailyUsage
+from config import GENERATION_ENABLED, DAILY_REPORT_LIMIT
 
 # ---------------------------------------------------------------------------
 # Logging setup
@@ -32,6 +40,20 @@ logger = logging.getLogger("founders-forge-api")
 # FastAPI app setup
 # ---------------------------------------------------------------------------
 app = FastAPI(title="Founders' Forge API")
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={
+            "success": False,
+            "error": "Rate limit exceeded. Please try again later."
+        },
+    )
 
 # Creates the business_plans table if it doesn't exist yet, every time the
 # app starts. Fine for early development. Once your schema stabilizes,
@@ -194,61 +216,137 @@ def health_check():
 
 
 @app.post("/generate-plan", response_model=GeneratePlanResponse)
-def generate_plan(request: GeneratePlanRequest, db: Session = Depends(get_db)):
-    logger.info(f"Received request for idea: {request.business_idea!r}")
+@limiter.limit("2/hour")
 
-    # Run the crew. If any unhandled error happens in the pipeline itself, return 500.
+def generate_plan(
+    request: Request,
+    request_data: GeneratePlanRequest,
+    db: Session = Depends(get_db),
+):
+    logger.info(f"Received request for idea: {request_data.business_idea!r}")
+    if not GENERATION_ENABLED:
+     raise HTTPException(
+        status_code=503,
+        detail="Report generation is temporarily disabled while the demo is undergoing maintenance.",
+    )
+
+    # ------------------------------------------------------------------
+    # Global daily usage limit
+    # ------------------------------------------------------------------
+    today = date.today()
+
+    usage = (
+        db.query(DailyUsage)
+        .filter(DailyUsage.day == today)
+        .first()
+    )
+
+    if usage is None:
+        usage = DailyUsage(
+            day=today,
+            reports_generated=0
+        )
+        db.add(usage)
+        db.commit()
+        db.refresh(usage)
+
+    if usage.reports_generated >= DAILY_REPORT_LIMIT:
+        raise HTTPException(
+            status_code=429,
+            detail="Today's demo limit has been reached. Please try again tomorrow."
+        )
+
+    # ------------------------------------------------------------------
+    # Run CrewAI
+    # ------------------------------------------------------------------
     try:
         crew = build_crew()
-        result = crew.kickoff(inputs={
-            "business_idea": request.business_idea,
-            "target_country": request.target_country,
-            "target_customer": request.target_customer,
-        })
+
+        result = crew.kickoff(
+        inputs={
+            "business_idea": request_data.business_idea,
+            "target_country": request_data.target_country,
+            "target_customer": request_data.target_customer,
+        }
+    )
+
     except Exception as e:
         logger.exception("Crew execution failed")
-        raise HTTPException(status_code=500, detail=f"Agent pipeline failed: {str(e)}")
+
+        error_message = str(e)
+
+        if "429" in error_message or "RESOURCE_EXHAUSTED" in error_message:
+            raise HTTPException(
+                status_code=429,
+                detail=(
+                    "The AI service is currently busy. Please wait a moment and try again."
+                
+            ),
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred while generating the business plan.",
+    )
 
     raw_output = result.raw if hasattr(result, "raw") else str(result)
 
-    # Try to parse the crew's output into clean JSON.
+    # ------------------------------------------------------------------
+    # Parse JSON
+    # ------------------------------------------------------------------
     try:
         plan = extract_json(raw_output)
+
     except ValueError as e:
         logger.error(f"JSON parsing failed: {e}")
-        # Don't crash the request — return raw_output so you can debug the prompt/output format.
+
         return GeneratePlanResponse(
             success=False,
             raw_output=raw_output,
-            error="Agents ran successfully but the output could not be parsed as JSON. "
-                  "Raw output is included below so you can inspect it."
+            error=(
+                "Agents ran successfully but the output could not be parsed as JSON. "
+                "Raw output is included below so you can inspect it."
+            ),
         )
 
-    # The LLM's own breakeven_months arithmetic isn't reliable (it can
-    # state a formula and then not actually follow it). Recompute it here
-    # in plain Python so the number is guaranteed correct given the plan's
-    # own inputs.
+    # ------------------------------------------------------------------
+    # Recalculate breakeven
+    # ------------------------------------------------------------------
     if isinstance(plan, dict) and isinstance(plan.get("finance"), dict):
         plan["finance"] = recompute_breakeven(plan["finance"])
 
-    # Save this plan to Postgres. If saving fails, log it but still return
-    # the plan to the user — a DB hiccup shouldn't lose their result.
+    # ------------------------------------------------------------------
+    # Save plan
+    # ------------------------------------------------------------------
     try:
         db_plan = BusinessPlan(
-            business_idea=request.business_idea,
-            target_country=request.target_country,
-            target_customer=request.target_customer,
+            business_idea=request_data.business_idea,
+            target_country=request_data.target_country,
+            target_customer=request_data.target_customer,
             plan_json=plan,
         )
+
         db.add(db_plan)
         db.commit()
         db.refresh(db_plan)
+
         logger.info(f"Saved plan to database with id={db_plan.id}")
+
     except Exception:
         logger.exception("Failed to save plan to database")
         db.rollback()
 
-    return GeneratePlanResponse(success=True, plan=plan)
+    # ------------------------------------------------------------------
+    # Count ONLY successful generations
+    # ------------------------------------------------------------------
+    usage.reports_generated += 1
+    db.commit()
+
+    return GeneratePlanResponse(
+        success=True,
+        plan=plan,
+    )
+    
 
 
 @app.get("/plans")

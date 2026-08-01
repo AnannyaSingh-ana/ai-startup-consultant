@@ -1,6 +1,7 @@
 from crewai import Agent
 from tools import search_tool
 
+
 market_research_agent = Agent(
     role="Market Research Analyst",
     goal=(
@@ -20,4 +21,5 @@ market_research_agent = Agent(
     tools=[search_tool],
     verbose=True,
     allow_delegation=False,
+    
 )

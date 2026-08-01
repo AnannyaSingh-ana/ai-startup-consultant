@@ -20,4 +20,5 @@ competitor_analysis_agent = Agent(
     tools=[search_tool],
     verbose=True,
     allow_delegation=False,
+   
 )

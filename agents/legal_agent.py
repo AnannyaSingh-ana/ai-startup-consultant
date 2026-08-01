@@ -17,4 +17,5 @@ legal_agent = Agent(
     ),
     verbose=True,
     allow_delegation=False,
+    
 )

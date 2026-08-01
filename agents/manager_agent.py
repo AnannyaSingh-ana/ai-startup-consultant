@@ -1,5 +1,6 @@
 from crewai import Agent
 
+
 manager_agent = Agent(
     role="Business Plan Manager",
     goal=(
@@ -15,4 +16,5 @@ manager_agent = Agent(
     ),
     verbose=True,
     allow_delegation=False,
+    
 )

@@ -3,7 +3,15 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 
 from database import Base
+from sqlalchemy import Column, Integer, Date
+from datetime import date
 
+class DailyUsage(Base):
+    __tablename__ = "daily_usage"
+
+    id = Column(Integer, primary_key=True, index=True)
+    day = Column(Date, unique=True, nullable=False, default=date.today)
+    reports_generated = Column(Integer, default=0)
 
 class BusinessPlan(Base):
     __tablename__ = "business_plans"

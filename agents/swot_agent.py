@@ -1,5 +1,6 @@
 from crewai import Agent
 
+
 swot_agent = Agent(
     role="SWOT Analyst",
     goal=(
@@ -15,4 +16,5 @@ swot_agent = Agent(
     ),
     verbose=True,
     allow_delegation=False,
+    
 )
