@@ -75,9 +75,10 @@ Founders' Forge acts like an AI consulting firm by answering these questions thr
 - Competitor analysis
 - Historical startup failure analysis
 - SWOT analysis
-- AI-generated financial estimates
+- Illustrative financial projections
 - Investment scoring
 - Founder recommendations
+- Downloadable PDF business report
 
 ### Engineering
 - FastAPI REST API
@@ -143,7 +144,7 @@ F --> H[Frontend Dashboard]
 
 ## Example Output
 
-For every startup idea, Founders' Forge generates:
+For every startup idea, Founders' Forge generates a downloadable PDF report containing:
 
 - Executive Summary
 - Market Research
@@ -174,7 +175,6 @@ For every startup idea, Founders' Forge generates:
 
 - Memory across startup iterations
 - Investor-ready pitch deck generation
-- PDF export
 - Interactive financial modeling
 - Follow-up consulting chat
 - Additional integrations
