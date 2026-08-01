@@ -15,6 +15,8 @@
 
 ## Screenshots
 
+## Screenshots
+
 ### Home
 
 ![Home](README-assets/01-input-screen.png)
@@ -35,9 +37,17 @@
 
 ![Financial Analysis](README-assets/05-finance-analysis.png)
 
+### Marketing Strategy
+
+![Marketing Strategy](README-assets/06-marketing.png)
+
 ### Founder Recommendation
 
-![Founder Recommendation](README-assets/06-founder-advisor.png)
+![Founder Recommendation](README-assets/07-founder-advisor.png)
+
+### Export Report
+
+![Export Report](README-assets/export-report-pdf.png)
 
 Founders' Forge is an AI-powered startup consulting platform that helps aspiring founders validate business ideas before investing time and money.
 
