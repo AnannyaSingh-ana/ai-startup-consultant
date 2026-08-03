@@ -216,7 +216,7 @@ def health_check():
 
 
 @app.post("/generate-plan", response_model=GeneratePlanResponse)
-@limiter.limit("2/hour")
+@limiter.limit("1/hour")
 
 def generate_plan(
     request: Request,
