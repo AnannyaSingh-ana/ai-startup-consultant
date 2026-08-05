@@ -1,4 +1,4 @@
-# Founders' Forge — Multi-Agent Startup Consultant
+# Founders' Forge : Multi-Agent Startup Consultant
 
 > Validate startup ideas using an AI consulting team powered by multiple specialized AI agents.
 
